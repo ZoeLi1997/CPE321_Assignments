@@ -2,10 +2,9 @@
 
 import sys
 import os
-from tools import *
+# from tools import *
 from Crypto.Cipher import AES
 import binascii
-
 C_SIZE = 16
 
 
@@ -37,6 +36,7 @@ def add_padding(text):
 
 def ECB_encrypt(key, text):
     text = add_padding(text)
+    print(len(text))
     encrypted = bytes()
     for i in range(0, len(text), C_SIZE):
         e_chunk = aes_encrypt(key, text[i:i+C_SIZE])
@@ -93,10 +93,10 @@ def task1():
     key = os.urandom(C_SIZE)
     cipher = CBC_encrypt(key, text)
     open(outfile + "CBC_enc.bmp", "wb").write(header +
-                                              cipher[C_SIZE:(len(text))])
+                                              cipher[:len(text)])
     msg = CBC_decrypt(key, cipher)
     open(outfile + "CBC_dec.bmp", "wb").write(header +
-                                              msg[C_SIZE:(len(text))])
+                                              msg[:len(text)])
 
 
 '''
@@ -178,7 +178,6 @@ def main():
         task2()
     elif(flag == '-3'):
         task3()
-
 
 if __name__ == "__main__":
     main()
