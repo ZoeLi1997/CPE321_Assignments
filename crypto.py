@@ -2,6 +2,7 @@
 
 import sys
 import os
+import urllib.parse
 # from tools import *
 from Crypto.Cipher import AES
 import binascii
@@ -73,6 +74,18 @@ def CBC_decrypt(key, cipher):
             decrypted += d_chunk
     return decrypted
 
+def submit(key, str):
+    url_encoded_key = urllib.parse.quote(str)
+    input = "userid=456;userdata=" + url_encoded_key + ";session-id=31337"
+    padded_input = add_padding(bytes(input, 'utf-8'))
+    return CBC_encrypt(key, padded_input) # in bytes
+
+def verify(key, cipher):
+    decrypted_text = CBC_decrypt(key, cipher)
+    if bytes(";admin=true;", 'utf-8') in decrypted_text:
+        return True
+    else:
+        return False
 
 def task1():
     infile = sys.argv[2]
@@ -109,8 +122,10 @@ def task1():
 def task2():
     # Modify image file with 54 byte header
 
-    infile = sys.argv[2]
-    outfile = sys.argv[3]
+    input_str = sys.argv[2]
+    key = os.urandom(C_SIZE)
+    cipher_str = submit(key, input_str) # cipher_str is in bytes
+    print(verify(key, cipher_str))
 
 
 def task3():
