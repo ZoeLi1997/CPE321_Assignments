@@ -83,7 +83,7 @@ def submit(key, str, attack):
 
 def verify(key, cipher, delta):
     decrypted_text = CBC_decrypt(key, cipher)
-    if delta:
+    if delta: # if there's an attack, xor the decrypted text with delta
         decrypted_text = xor(delta, decrypted_text)
     if bytes(";admin=true;", 'utf-8') in decrypted_text:
         return True
@@ -114,20 +114,17 @@ def task1():
                                               msg[:len(text)])
 
 
-'''
-
-
-
-'''
-
 def task2():
-    # Modify image file with 54 byte header
+
     # get input string from user
     input_str = sys.argv[2]
+    attack = False
+    if len(sys.argv) > 3  and sys.argv[3] == "attack":
+        attack = True
     # generate a random key
     key = os.urandom(C_SIZE)
     # get encrypted cipher text and delta
-    cipher_str, delta = submit(key, input_str, True)
+    cipher_str, delta = submit(key, input_str, attack)
     # verify the decrypted result
     print(verify(key, cipher_str, delta))
 
