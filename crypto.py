@@ -8,7 +8,6 @@ from Crypto.Cipher import AES
 import binascii
 C_SIZE = 16
 
-
 def xor(byte1, byte2):
     return bytes(a ^ b for a, b in zip(byte1, byte2))
 
@@ -53,16 +52,18 @@ def ECB_decrypt(key, cipher):
     return decrypted
 
 
-def CBC_encrypt(key, text):
+def CBC_encrypt(key, text, attack=None):
     IV = os.urandom(C_SIZE)
+    delta = bytes()
+    if attack: # if decide to attack, get the delta
+        delta = xor(bytes("userid=456;userdata=;admin=true;;session-id=31337", 'utf-8'), text)
     text = add_padding(text)
-
     e_chunk = IV
     encrypted = bytes(IV)
     for i in range(0, len(text), C_SIZE):
         e_chunk = aes_encrypt(key, text[i:i+C_SIZE], XOR=e_chunk)
         encrypted += e_chunk
-    return encrypted
+    return encrypted,delta
 
 
 def CBC_decrypt(key, cipher):
@@ -74,18 +75,19 @@ def CBC_decrypt(key, cipher):
             decrypted += d_chunk
     return decrypted
 
-def submit(key, str):
+def submit(key, str, attack):
     url_encoded_key = urllib.parse.quote(str)
     input = "userid=456;userdata=" + url_encoded_key + ";session-id=31337"
     padded_input = add_padding(bytes(input, 'utf-8'))
-    return CBC_encrypt(key, padded_input) # in bytes
+    return CBC_encrypt(key, padded_input, attack) # in bytes
 
-def verify(key, cipher):
+def verify(key, cipher, delta):
     decrypted_text = CBC_decrypt(key, cipher)
+    if delta:
+        decrypted_text = xor(delta, decrypted_text)
     if bytes(";admin=true;", 'utf-8') in decrypted_text:
         return True
-    else:
-        return False
+    return False
 
 def task1():
     infile = sys.argv[2]
@@ -104,7 +106,7 @@ def task1():
     open(outfile + "ECB_dec.bmp", "wb").write(header + msg[:len(text)])
 
     key = os.urandom(C_SIZE)
-    cipher = CBC_encrypt(key, text)
+    cipher = CBC_encrypt(key, text)[0]
     open(outfile + "CBC_enc.bmp", "wb").write(header +
                                               cipher[:len(text)])
     msg = CBC_decrypt(key, cipher)
@@ -118,15 +120,16 @@ def task1():
 
 '''
 
-
 def task2():
     # Modify image file with 54 byte header
-
+    # get input string from user
     input_str = sys.argv[2]
+    # generate a random key
     key = os.urandom(C_SIZE)
-    cipher_str = submit(key, input_str) # cipher_str is in bytes
-    print(verify(key, cipher_str))
-
+    # get encrypted cipher text and delta
+    cipher_str, delta = submit(key, input_str, True)
+    # verify the decrypted result
+    print(verify(key, cipher_str, delta))
 
 def task3():
     # Modify image file with 54 byte header
