@@ -1,0 +1,297 @@
+% Todas as linhas precedidas pelo simbolo '%' são comentários
+% e não afetam em nada o seu texto final.
+
+% IGNORE. Pacotes necessários e acessórios para o documento
+\documentclass[12pt]{exam}
+\usepackage{amsthm}
+%\usepackage{libertine}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{multicol}
+\usepackage[shortlabels]{enumitem}
+\usepackage{subcaption}
+% ---
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{seqsplit}
+\usepackage{titlesec}
+\usepackage{changepage}
+\usepackage{graphicx}
+\usepackage{float}
+
+\graphicspath{ {./images/} }
+
+
+
+\newcommand{\class}{CPE 321 - Introduction to Security} 
+\newcommand{\term}{Fall 2020}  
+\newcommand{\worknum}{Assignment 2} 
+\newcommand{\examdate}{20/21/0020} 
+
+
+\setlength{\parindent}{0in}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.95}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    %numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single,
+    framerule=1pt,
+    xleftmargin=25pt,
+    xrightmargin=25pt,
+    breakindent=0pt,
+    resetmargins=true,
+    aboveskip=0pt, 
+    framesep=0pt, 
+    % Margins and box
+    framextopmargin=15pt,
+    framexbottommargin=15pt,
+    framexleftmargin=15pt,
+    framexrightmargin=15pt
+}
+
+\lstset{style=mystyle}
+
+\titleformat{\section}
+{\Large\bfseries}
+{\thesection}{0.5em}{}
+
+\titleformat{\subsection}
+{\normalfont\ttfamily\bfseries}
+{\large{\thesubsection) }}{0.5em}{}
+
+\renewcommand{\thesection}{}% Remove section references...
+\renewcommand{\thesubsection}{\arabic{subsection}}%... from subsections
+
+\begin{document} 
+\pagestyle{plain}
+\thispagestyle{empty}
+
+\noindent
+\begin{tabular*}{\textwidth}{l @{\extracolsep{\fill}} r @{\extracolsep{6pt}} l}
+ \textbf{\worknum} & \textbf{Name:} & \textit{Ethan Ahlquist}\\
+\textbf{\class} &&\\
+\end{tabular*}\\
+
+\rule[2ex]{\textwidth}{2pt}
+
+% ---
+
+\bigskip
+\textbf{\huge{Assignment 2: OTP}}
+
+    
+\section*{Command Usage:}
+
+\bigskip
+
+\texttt{otp.py [TASK]... [FILES]... }
+
+\bigskip
+
+Task Flags:
+\begin{itemize}[label={}]
+    \item \texttt{-1 ...}
+    \item \texttt{-2 INFILE OUTFILE} 
+    \item \texttt{-3 IN.bmp OUT.bmp}
+    \item \texttt{-4 IN1.bmp IN2.bmp OUT.bmp}
+\end{itemize}
+
+\section*{Repeating Logic:}
+
+\begin{enumerate}[\bf 1)]
+    \item \textbf{\texttt{xor\_otp()}}
+
+    All tasks used this function.
+
+    Checked to see if the encryption key and text were of the same length.
+    Then xor-ing the bytes between them.
+
+    \bigskip
+    \lstinputlisting[language=Python, firstline=20, lastline=27]{./tools.py}
+    \bigskip
+
+    \item \textbf{\texttt{xor\_bytes()}}
+
+    This xor's the contenst of two bytes objects.
+
+    \bigskip
+    \lstinputlisting[language=Python, firstline=16, lastline=17]{./tools.py}
+    \bigskip
+
+    \item \textbf{\texttt{random\_bytes()}}
+
+    This reads random bytes from \texttt{/dev/urandom} for a given size.
+
+    This is used in most tasks to produce a random key.
+
+    \bigskip
+    \lstinputlisting[language=Python, firstline=12, lastline=13]{./tools.py}
+    \bigskip
+
+    \item \textbf{\texttt{checkDecryption()}}
+
+    This is used in some tasks to validate to the user that two byte\_strings
+    actually have the same value.
+
+    \bigskip
+    \lstinputlisting[language=Python, firstline=5, lastline=9]{./tools.py}
+    \bigskip
+
+\end{enumerate}
+
+
+\section*{Tasks:}
+
+\subsection{./otp.py -1}
+
+    \bigskip
+This task only tests to see if the xor functionality is 
+working between byte strings. 
+
+My only difficulty was removing TypeErrors.
+
+    \bigskip
+    \bigskip
+    \lstinputlisting[language=Python, firstline=7, lastline=10]{./otp.py}
+    \bigskip
+
+    The output was just the hex dump of the xor contents. 
+    \bigskip
+    
+Printing: 
+\begin{verbatim}
+    250f164c0a1b54441601015259071449154e
+\end{verbatim}
+    
+
+\subsection{./otp.py -2 ./files/in.txt out.txt}
+
+    \bigskip
+
+This task was used to encrypt entire files, overwriting header information as
+well as its contents. This required the file to be opened as a byte reader,
+which took a little time to figure out.
+
+    \bigskip
+    \bigskip
+    \lstinputlisting[language=Python, firstline=13, lastline=27]{./otp.py}
+    \bigskip
+
+The output for this task is hard to display, because most of the output
+characters are unprintable. However within the program there is a function that
+checks to see if the decryption was done correctly by decrypting the encrypted
+text and comparing it to the original text.
+
+This function would print:
+
+\begin{verbatim}
+    Valid Decryption:  True
+\end{verbatim}
+
+When decryption was reversible.
+
+
+
+\subsection{./otp.py -3 ./files/mustang.bmp task3out.bmp}
+
+\bigskip
+
+This task added the difficulty of dealing with a byte-offset where the certain header
+information, for a bmp file, would not be encrypted. Otherwise, the encryption was the same.
+
+    \bigskip
+    \bigskip
+    \lstinputlisting[language=Python, firstline=30, lastline=52]{./otp.py}
+    \bigskip
+
+    Here is the output file created from this encryption:
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.50\textwidth]{task3out}
+        \caption{Resulting encryption bmp file}
+        \label{fig:task3}
+    \end{figure}
+
+    \textit{View the images. What do you observe? Are you able to derive any
+    useful information about from either of the encrypted images? What are the
+    causes for what you observe?}
+
+    From this image, I could see absolutely no pattern to its output. The colors
+    have very little association to each other and have wide distribution. What
+    caused this randomness was purely caused by the randomness of the key,
+    which was read from \texttt{/dev/urandom}. This key being completely
+    random, overshadowed the file contents which did have a pattern.
+
+    \subsection{./otp.py -4 ./files/mustang.bmp ./files/cp-logo.bmp task4out.bmp}
+
+\bigskip
+
+This task required two files to be encrypted with the same key. After this, the
+two files would be xor'ed to each other, which produced a file that was hardly
+encrypted, and the contents of both files were easily determined. The purpose
+of this task was to display the importance of not re using keys for encryption
+since the files then have an easy was to be decrypted.
+
+    \bigskip
+    \bigskip
+    \lstinputlisting[language=Python, firstline=55, lastline=79]{./otp.py}
+    \bigskip
+
+    Here is the output file created xor'ing the two file encryptions:
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.50\textwidth]{task4out}
+        \caption{bmp file of xor between encrypted files w/
+        shared key}
+        \label{fig:task4}
+    \end{figure}
+
+    \textit{View the output. Are you able to now derive any useful information about
+    the original plaintexts from the resulting image? What are the causes for
+what you observe?}\\
+
+    Now looking at the output, we can see extremely useful information regarding
+    the file contents. In fact, we can determine the contents of both files
+    simply by looking at it, that being a mustang and the cal poly logo. This is
+    because an xor operation is a reversible action if you know certain enough
+    information. In this case we know that the same key was used twice on both
+    files, meaning an xor between the two files would provide an unencrypted
+    file with the original files xor'ed together.
+
+    \section*{Conclusion:}
+
+The purpose of this lab was to display how important the use of unique keys are
+to an encryption  possess, especially an otp encryption. This is displayed in
+how easy the breaking of the encryption was, simply by xor'ing files with
+non-unique keys. From this, I can see that modern security solutions to encryption may
+be far more complicated than a simple xor to a string.
+
+
+
+\end{document}
+
