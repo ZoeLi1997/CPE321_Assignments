@@ -62,6 +62,7 @@ def CBC_encrypt(key, text):
         e_chunk = aes_encrypt(key, text[i:i+C_SIZE], XOR=e_chunk)
         encrypted += e_chunk
         if not IV_attack:
+            # got C1
             IV_attack = e_chunk
 
     return encrypted,IV_attack
@@ -80,7 +81,7 @@ def CBC_decrypt(key, cipher, IV_Prime):
 
 
 def submit(key, str):
-    url_encoded_key = urllib.parse.quote(str)
+    url_encoded_key = urllib.parse.quoxte(str)
     input = "userid=456;userdata=" + url_encoded_key + ";session-id=31337"
     padded_input = add_padding(bytes(input, 'utf-8'))
     return CBC_encrypt(key, padded_input)
@@ -125,13 +126,20 @@ def task2():
     IV_Prime = None
     if len(sys.argv) > 3  and sys.argv[3] == "attack":
         attack = True
+
     # generate a random key
     key = os.urandom(C_SIZE)
-    # get encrypted cipher text and delta
+
+    # get encrypted cipher text and IV
     cipher_str, IV = submit(key, input_str)
+
+    # calculate desired delta
     delta = xor(bytes("ata=zadminztruez".encode('utf-8')), bytes("ata=;admin=true;".encode('utf-8')))
+
+    # inject delta to IV for the attack
     if attack == True:
         IV_Prime = xor(delta, IV)
+
     # verify the decrypted result
     print(verify(key, cipher_str, IV_Prime))
 
