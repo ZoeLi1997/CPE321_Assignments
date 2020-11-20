@@ -142,5 +142,24 @@ def task2_attack2():
     print(decryption(c1, get_key(1), IV))  # g = p - 1
 
 
+def task3_attack2():
+    e = 65537
+    p = number.getPrime(n_length)
+    q = number.getPrime(n_length)
+    n = p * q
+    phi = (p - 1) * (q - 1)
+    # print(is_coprime(phi, e))  # True
+    d = solve_linear_congruence(e, 1, phi)
+    m1 = b"Hi Bob!"
+    IV = os.urandom(C_SIZE)
+    pub = 1
+    s = get_s(d, n, pub)
+    k = get_key(s)
+    c1 = encryption(add_padding(m1), k, IV)
+    # print(decryption(c1, get_key(1), IV))  # g = 1
+    # print(decryption(c1, get_key(0), IV))  # g = p
+    print(decryption(c1, get_key(1), IV))  # g = p - 1
+
+
 if __name__ == "__main__":
-    rsa("hello")
+    task3_attack2()
